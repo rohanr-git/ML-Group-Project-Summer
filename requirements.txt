@@ -1,0 +1,15 @@
+# requirements.txt - Package Dependencies
+#
+#  This file lists the necessary Python packages required to run this project.
+#
+#  To automatically download and install the specified package versions, 
+#  run the following command in your terminal or command prompt:
+#
+#  pip install -r requirements.txt
+#
+#  Note: It is recommended to install packages within a virtual environment to avoid conflicts with other project dependencies.
+#  Read more here: https://code.visualstudio.com/docs/python/environments
+
+matplotlib>=3.7.2
+numpy>=1.25.1
+pandas>=2.0.3
