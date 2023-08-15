@@ -7,9 +7,9 @@ import pandas as pd
 import numpy as np
 
 # Hyperparameters
-MOMENTUM = 0.01
+MOMENTUM = 0.03
 LEARNING_RATE = 0.01
-EPOCHS = 50
+EPOCHS = 20
 HIDDEN_SIZE = 21
 TEST_SIZE = 0.4
 
@@ -20,6 +20,8 @@ def sig_deriv(Z):
     return sig(Z) * (1 - sig(Z))
 
 def confusion_matrix(y_true, y_pred):
+    y_true = y_true.reshape(-1)
+    y_pred = y_pred.reshape(-1)
     tp = np.sum((y_true == 1) & (y_pred == 1))
     tn = np.sum((y_true == 0) & (y_pred == 0))
     fp = np.sum((y_true == 0) & (y_pred == 1))
