@@ -3,7 +3,7 @@
 # This file defines the parameters for various aspects of the program.
 
 datasets:
-  src: ../datasets/CVD_cleaned.csv    # The CSV that needs to be preprocessed.
-  dest: ../datasets/CVD_processed.csv # The location the final preprocessed CSV will go.
+  src: datasets/CVD_cleaned.csv    # The CSV that needs to be preprocessed.
+  dest: datasets/CVD_processed.csv # The location the final preprocessed CSV will go.
 seeds:
   random_state: 42                    # The seed for how the training/testing sets are split.

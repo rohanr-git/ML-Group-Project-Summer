@@ -9,7 +9,7 @@ from utils.preprocess import preprocess
 from utils.config import load_config
 
 def main():
-    config = load_config("../config.yaml")
+    config = load_config("config.yaml")
     preprocess(src=config["datasets"]["src"], dest=config["datasets"]["dest"])
     data = pd.read_csv(config["datasets"]["dest"], header=None, low_memory=False)
     X = data.iloc[:, :-1]  # All features of the dataset (columns 0-17)
