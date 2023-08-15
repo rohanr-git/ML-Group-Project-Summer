@@ -1,6 +1,6 @@
 import pandas as pd
 
-def preprocess(src: str, dest: str) -> None :
+def preprocess_csv(src: str, dest: str) -> None :
     '''
     Preprocess data from a source CSV file and save the processed data to a destination CSV file.
 
@@ -91,3 +91,32 @@ def preprocess(src: str, dest: str) -> None :
             data[column] = data[column].astype(float)
 
     data.to_csv(dest, index=False)
+
+def balance_dataset(data):
+    '''
+    
+    '''
+    data.iloc[:, 8:12] = data.iloc[:, 8:12] / 500
+
+    # Balance data due to extreme class imbalance (92% negative, 8% positive)
+    data_majority = data[data.iloc[:, -1] == 0]
+    data_minority = data[data.iloc[:, -1] == 1]
+
+    # Oversample minority class
+    minority_size = data_minority.shape[0]
+    majority_size = data_majority.shape[0]
+
+    # Repeat the minority class rows until it matches the size of the majority class
+    oversampled_minority = data_minority.loc[data_minority.index.repeat((majority_size // minority_size) + 1)].reset_index(drop=True)
+    oversampled_minority = oversampled_minority.iloc[:majority_size, :]
+
+    # Combine majority class with oversampled minority class
+    data_balanced = pd.concat([data_majority, oversampled_minority])
+
+    # Shuffle the data
+    data_balanced = data_balanced.sample(frac=1, random_state=42).reset_index(drop=True)
+
+    X = data_balanced.iloc[:, :-1].values
+    Y = data_balanced.iloc[:, -1].values
+
+    return X, Y
