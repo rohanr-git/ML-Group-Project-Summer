@@ -20,7 +20,7 @@ This is a group research project that compares the performance and accuracies of
     Read more here: https://code.visualstudio.com/docs/python/environments
 
 3.  Run the project:
-    ``py main.py``
+    ``py src/main.py``
 
 ## License
 
