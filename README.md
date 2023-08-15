@@ -19,6 +19,9 @@ This is a group research project that compares the performance and accuracies of
     > Note: It is recommended to install packages within a virtual environment to avoid conflicts with other project dependencies.
     Read more here: https://code.visualstudio.com/docs/python/environments
 
+3.  Run the project:
+    ``py main.py``
+
 ## License
 
 This project is distributed under the MIT License.
