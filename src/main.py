@@ -6,10 +6,12 @@ CS 445/545 | Portland State University | ML Group Assignment Summer 2023
 import pandas as pd
 import utils.mathfuncs as mf
 import numpy as np
+import warnings
 from utils.config import load_config
 from utils.train_test_split import train_test_split
 from utils.preprocess import preprocess_csv, balance_dataset
 
+warnings.filterwarnings('ignore')
 
 def main():
     # Load configuration options
@@ -19,9 +21,6 @@ def main():
     data = preprocess_csv(
         src=config["datasets"]["src"], dest=config["datasets"]["dest"]
     )
-
-    # Load data
-    data = pd.read_csv(config["datasets"]["dest"])
 
     # X: Features
     # Y: Targets
