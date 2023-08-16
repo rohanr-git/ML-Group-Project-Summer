@@ -1,15 +1,15 @@
 import pandas as pd
 
-def preprocess_csv(src: str, dest: str) -> None :
+def preprocess_csv(src: str, dest: str) :
     '''
-    Preprocess data from a source CSV file and save the processed data to a destination CSV file.
+    Preprocess data from source CSV file and save the processed data to a destination CSV file.
 
     Args:
         src (str): Path to the source CSV file.
         dest (str): Path to the destination CSV file where the preprocessed data will be saved.
 
     Returns:
-        None
+        Pandas Dataframe
     '''
     data = pd.read_csv(src)
     
@@ -52,6 +52,9 @@ def preprocess_csv(src: str, dest: str) -> None :
     # Map age_category to numerical values
     age_category_map = {'18-24': 0.0, '25-29': 1.0, '30-34': 2.0, '35-39': 3.0, '40-44': 4.0, '45-49': 5.0, '50-54': 6.0, '55-59': 7.0, '60-64': 8.0, '65-69': 9.0, '70-74': 10.0, '75-79': 11.0, '80+': 12.0}
     data['Age_Category'] = data['Age_Category'].map(age_category_map)
+    # Normalizing the age_category
+    age_max = max(data['Age_Category'])
+    data['Age_Category'] = data['Age_Category'] / age_max
 
     # Map heart_disease to numerical values
     heart_disease_map = {'No': 0.0, 'Yes': 1.0}
@@ -65,24 +68,35 @@ def preprocess_csv(src: str, dest: str) -> None :
     data['Fruit_Consumption'] = pd.to_numeric(data['Fruit_Consumption'], errors='coerce')
     data['Green_Vegetables_Consumption'] = pd.to_numeric(data['Green_Vegetables_Consumption'], errors='coerce')
     data['FriedPotato_Consumption'] = pd.to_numeric(data['FriedPotato_Consumption'], errors='coerce')
-
-    # Additional columns and their ranges
     data['Height_(cm)'] = pd.to_numeric(data['Height_(cm)'], errors='coerce')
     data['Weight_(kg)'] = pd.to_numeric(data['Weight_(kg)'], errors='coerce')
     data['BMI'] = pd.to_numeric(data['BMI'], errors='coerce')
 
-    # Clipping column value ranges
-    height_range = (91, 241)
-    weight_range = (24.9, 293)
-    bmi_range = (12, 99.3)
+    # Max of each column
+    alchohol_max = max(data['Alcohol_Consumption'])
+    fruit_max = max(data['Fruit_Consumption'])
+    green_veg_max = max(data['Green_Vegetables_Consumption']) 
+    fried_potato_max = max(data['FriedPotato_Consumption'])
+    height_max = max(data['Height_(cm)'])
+    weight_max = max(data['Weight_(kg)'])
+    bmi_max = max(data['BMI'])
 
-    # Clip column values within predefined ranges
-    data['Height_(cm)'] = data['Height_(cm)'].apply(lambda x: max(min(x, height_range[1]), height_range[0]))
-    data['Weight_(kg)'] = data['Weight_(kg)'].apply(lambda x: max(min(x, weight_range[1]), weight_range[0]))
-    data['BMI'] = data['BMI'].apply(lambda x: max(min(x, bmi_range[1]), bmi_range[0]))
-
+    # Normalize the columns using the max
+    data['Alcohol_Consumption'] = data['Alcohol_Consumption'] / alchohol_max
+    data['Fruit_Consumption'] = data['Fruit_Consumption'] / fruit_max
+    data['Green_Vegetables_Consumption'] = data['Green_Vegetables_Consumption'] / green_veg_max
+    data['FriedPotato_Consumption'] = data['FriedPotato_Consumption'] / fried_potato_max
+    data['Height_(cm)'] = data['Height_(cm)'] / height_max
+    data['Weight_(kg)'] = data['Weight_(kg)'] / weight_max
+    data['BMI'] = data['BMI'] / bmi_max
+    
     # Select specific columns to keep
-    columns_to_keep = ['General_Health', 'Checkup', 'Exercise', 'Skin_Cancer', 'Other_Cancer', 'Depression', 'Diabetes', 'Arthritis', 'Sex', 'Age_Category', 'Height_(cm)', 'Weight_(kg)', 'BMI', 'Smoking_History', 'Alcohol_Consumption', 'Fruit_Consumption', 'Green_Vegetables_Consumption', 'FriedPotato_Consumption', 'Heart_Disease']
+    columns_to_keep = ['General_Health', 'Checkup', 'Exercise', 
+                       'Skin_Cancer', 'Other_Cancer', 'Depression', 
+                       'Diabetes', 'Arthritis', 'Sex', 'Age_Category', 
+                       'Height_(cm)', 'Weight_(kg)', 'BMI', 'Smoking_History', 
+                       'Alcohol_Consumption', 'Fruit_Consumption', 'Green_Vegetables_Consumption', 
+                       'FriedPotato_Consumption', 'Heart_Disease']
     data = data[columns_to_keep]
 
     # Convert non-object columns to float
@@ -91,6 +105,10 @@ def preprocess_csv(src: str, dest: str) -> None :
             data[column] = data[column].astype(float)
 
     data.to_csv(dest, index=False)
+
+    data = pd.read_csv(dest)
+
+    return data
 
 def balance_dataset(data):
     '''
