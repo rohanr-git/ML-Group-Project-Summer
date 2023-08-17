@@ -5,19 +5,15 @@
 datasets:
   src: datasets/CVD_unprocessed.csv   # The CSV that needs to be preprocessed.
   dest: datasets/CVD_processed.csv    # The location the final preprocessed CSV will go.
-model_1:
-  model: 1                            # Model number for graph filename
-  momentum: 0.03                      #
-  learning_rate: 0.01                 #
-  epochs: 20                          #
-  hidden_size: 21                     #
-  test_size: 0.4                      #
-  seed: 42                            #
-model_2:
-  model: 2                            # Model number for graph filename
-  momentum: 0.03                      #
-  learning_rate: 0.01                 #
-  epochs: 20                          #
-  hidden_size: 21                     #
-  test_size: 0.4                      #
-  seed: 42                            #
+params:
+  name: experiment 1                  # Name of the experiment
+  activation: sigmoid                 # Activation function for hidden layers
+                                      # Possible values: sigmoid, ReLU, Tanh, Softmax, Linear, Leaky ReLU, PReLU
+  momentum: 0.01                      # Momentum value for optimizer (SGD)
+  learning_rate: 0.01                 # Learning rate for optimizer
+  epochs: 1                           # Number of training epochs
+  hidden_units: 21                    # Number of units/neurons in each hidden layer
+  hidden_layers: 1                    # Number of hidden layers in the neural network
+  batch_size: 1                       # Batch size for training
+  test_size: 0.4                      # Proportion of data used for testing (0.4 = 40%)
+  seed: 42                            # Random seed for reproducibility

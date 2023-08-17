@@ -9,7 +9,7 @@ def preprocess_csv(src: str, dest: str) :
         dest (str): Path to the destination CSV file where the preprocessed data will be saved.
 
     Returns:
-        Pandas Dataframe
+        None
     '''
     data = pd.read_csv(src)
     
@@ -105,15 +105,10 @@ def preprocess_csv(src: str, dest: str) :
             data[column] = data[column].astype(float)
 
     data.to_csv(dest, index=False)
-
-    data = pd.read_csv(dest)
-
-    return data
+    
+    return
 
 def balance_dataset(data):
-    '''
-    
-    '''
     data.iloc[:, 8:12] = data.iloc[:, 8:12] / 500
 
     # Balance data due to extreme class imbalance (92% negative, 8% positive)

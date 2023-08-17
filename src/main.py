@@ -3,109 +3,119 @@ Alexander Gutowsky, Ethan Saftler, Gatlin Newhouse, Manisha Katta, Rohan Reddy
 CS 445/545 | Portland State University | ML Group Assignment Summer 2023
 """
 
+import argparse
+import matplotlib as plt
+from sklearn.discriminant_analysis import StandardScaler
+import tensorflow as tf
 import pandas as pd
-import utils.mathfuncs as mf
-import numpy as np
-import warnings
-from utils.config import load_config
+from utils.config import load_config, pretty_print_config
 from utils.train_test_split import train_test_split
 from utils.preprocess import preprocess_csv, balance_dataset
 
-warnings.filterwarnings('ignore')
-
 def main():
-    # Load configuration options
-    config = load_config("config.yaml")
-
-    # Preprocess and load data into memory
-    data = preprocess_csv(
-        src=config["datasets"]["src"], dest=config["datasets"]["dest"]
+    # Command line argument parser
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-p", "--preprocess", action="store_true", help="Preprocess CVD Dataset")
+    args = parser.parse_args()
+    
+    # Reading in configuration options
+    print("- Attempting to read in config file from './config.yaml'")
+    try:
+        config: dict = load_config(src="./config.yaml")
+        print("Successfully obtained the following configuration options from './config.yaml'")
+        pretty_print_config(config)
+    except FileNotFoundError as e:
+        print(f"Error: {e}")
+        print("The specified config file does not exist. Is it located in './config.yaml'?")
+        exit(1)
+    
+    # https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/experimental/SGD
+    optimizer = tf.keras.optimizers.experimental.SGD(
+        learning_rate=config["params"]["learning_rate"],
+        momentum=config["params"]["momentum"],
+        nesterov=False,
+        weight_decay=None,
+        clipnorm=None,
+        clipvalue=None,
+        global_clipnorm=None,
+        use_ema=False,
+        ema_momentum=0.99,
+        ema_overwrite_frequency=None,
+        jit_compile=True,
+        name='SGD',
     )
 
+    # Preprocessing, if the user supplied the command line argument
+    if args.preprocess:
+        print(f"Attempting to preprocessing datafile from '{config['datasets']['src']}'")
+        preprocess_csv(src=config['datasets']['src'], dest=config['datasets']['dest'])
+        print("Done.")
+        print(f"Successfully preprocessed dataset. File is stored at '{config['datasets']['dest']}'")
+    
+    # Loading dataset into memory
+    try:
+        data: pd.DataFrame = pd.read_csv(config['datasets']['dest'])
+    except FileNotFoundError as e:
+        print(f"Error: {e}")
+        print("The specified CSV file does not exist. Is the file properly preprocessed?")
+        print("Usage: py main.py -p")
+        exit(1)
+    
     # X: Features
     # Y: Targets
     X, Y = balance_dataset(data)
-
     # X_train: Training features
     # X_test:  Testing features
     # Y_train: Training targets
     # Y_test:  Testing targets
-
     X_train, X_test, Y_train, Y_test = train_test_split(
-        X, Y, config["model_1"]["test_size"], config["model_1"]["seed"]
+        X, Y, config["params"]["test_size"], config["params"]["seed"]
     )
 
-    # Calculate the mean and standard deviation for each feature in the training set
-    mean = X_train.mean(axis=0)
-    std = X_train.std(axis=0)
+    input_shape = (18,)
+    num_classes = 2
+    model = tf.keras.Sequential()
 
-    # Normalize the training data
-    X_train = mf.normalize(X_train, mean, std)
-
-    # Normalize the test data using the same mean and standard deviation
-    X_test = mf.normalize(X_test, mean, std)
-
-    # Initialize weights and biases
-    input_size = X_train.shape[1]
-    W1, b1, W2, b2 = mf.initalize_random_weights(
-        input_size, config["model_1"]["hidden_size"]
+    # Generating the hidden layers
+    for _ in range(config["params"]["hidden_layers"]):
+        model.add(tf.keras.layers.Dense(
+            units=config["params"]["hidden_units"],
+            activation=config["params"]["activation"],
+            input_shape=input_shape)
+        )
+    # Output Layer
+    model.add(tf.keras.layers.Dense(units=num_classes, activation='softmax'))
+    model.compile(
+        optimizer=optimizer,
+        loss='categorical_crossentropy',
+        metrics=['accuracy']
     )
 
-    # Hyperparameters
-    MOMENTUM = config["model_1"]["momentum"]
-    LEARNING_RATE = config["model_1"]["learning_rate"]
-    EPOCHS = config["model_1"]["epochs"]
-    MODEL = config["model_1"]["model"]
+    # Standardize the features using a scaler
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
 
-    # Record accuracies and epochs
-    accuracies = []
+    # Convert labels to one-hot encoding
+    Y_train_onehot = tf.keras.utils.to_categorical(Y_train, num_classes)
+    Y_test_onehot = tf.keras.utils.to_categorical(Y_test, num_classes)
 
-    # Training
-    for epoch in range(EPOCHS):
-        # Forward pass
-        Z1 = np.dot(X_train, W1) + b1
-        A1 = mf.sig(Z1)
-        Z2 = np.dot(A1, W2) + b2
-        A2 = mf.sig(Z2)
-
-        # Backward pass
-        dZ2 = A2 - Y_train.reshape(-1, 1)
-        dW2 = np.dot(A1.T, dZ2)
-        db2 = np.sum(dZ2, axis=0, keepdims=True)
-        dZ1 = np.dot(dZ2, W2.T) * mf.sig_deriv(Z1)
-        dW1 = np.dot(X_train.T, dZ1)
-        db1 = np.sum(dZ1, axis=0, keepdims=True)
-
-        # Update with momentum
-        W2 = W2 - LEARNING_RATE * dW2 + MOMENTUM * W2
-        b2 = b2 - LEARNING_RATE * db2 + MOMENTUM * b2
-        W1 = W1 - LEARNING_RATE * dW1 + MOMENTUM * W1
-        b1 = b1 - LEARNING_RATE * db1 + MOMENTUM * b1
-
-        # Accuracy
-        predictions = (A2 > 0.5).astype(int)
-        accuracy = np.mean(predictions == Y_train.reshape(-1, 1))
-        accuracies.append(accuracy * 100)
-        print(f"Epoch {epoch + 1}: Accuracy {accuracy * 100:.2f}%")
-
-    # Test
-    Z1 = np.dot(X_test, W1) + b1
-    A1 = mf.sig(Z1)
-    Z2 = np.dot(A1, W2) + b2
-    A2 = mf.sig(Z2)
-    predictions = (A2 > 0.5).astype(int)
-    cm = mf.confusion_matrix(Y_test, predictions)
-    print("Confusion Matrix:")
-    print(cm)
-
-    # Put the accuracies into a dataframe with the epoch number as the index
-    acc_df = pd.DataFrame(accuracies, columns=["Accuracy"], index=range(1, EPOCHS + 1))
-    # Plot the accuracies
-    plt = acc_df.plot(
-        title="Accuracy over Epochs", xlabel="Epochs", ylabel="Accuracy (%)"
+    # Train the model
+    print("Beginning Training")
+    history = model.fit(
+        X_train_scaled, Y_train_onehot,
+        epochs=config["params"]["epochs"],
+        batch_size=config["params"]["batch_size"],
+        validation_data=(X_test_scaled, Y_test_onehot),
+        verbose=1
     )
-    plt.get_figure().savefig(f"graphs/accuracy_model_{MODEL}.png")
 
+    # Evaluate the model on the test data
+    test_loss, test_accuracy = model.evaluate(X_test_scaled, Y_test_onehot, verbose=0)
+    print(f"Test Loss: {test_loss:.4f}")
+    print(f"Test Accuracy: {test_accuracy:.4f}")
+
+    print("Done.")
 
 if __name__ == "__main__":
     main()

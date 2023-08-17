@@ -13,3 +13,9 @@ def load_config(src: str):
     config: None
     with open(src, "r") as yaml_file :  config = yaml.safe_load(yaml_file)
     return config
+
+def pretty_print_config(config):
+    for key, value in config.items():
+        print(f"  -{key}:")
+        for sub_key, sub_value in value.items():
+            print(f"\t-{sub_key}: '{sub_value}'")
