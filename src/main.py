@@ -12,23 +12,30 @@ from utils.config import load_config, pretty_print_config
 from utils.train_test_split import train_test_split
 from utils.preprocess import preprocess_csv, balance_dataset
 
+
 def main():
     # Command line argument parser
     parser = argparse.ArgumentParser()
-    parser.add_argument("-p", "--preprocess", action="store_true", help="Preprocess CVD Dataset")
+    parser.add_argument(
+        "-p", "--preprocess", action="store_true", help="Preprocess CVD Dataset"
+    )
     args = parser.parse_args()
-    
+
     # Reading in configuration options
     print("- Attempting to read in config file from './config.yaml'")
     try:
         config: dict = load_config(src="./config.yaml")
-        print("Successfully obtained the following configuration options from './config.yaml'")
+        print(
+            "Successfully obtained the following configuration options from './config.yaml'"
+        )
         pretty_print_config(config)
     except FileNotFoundError as e:
         print(f"Error: {e}")
-        print("The specified config file does not exist. Is it located in './config.yaml'?")
+        print(
+            "The specified config file does not exist. Is it located in './config.yaml'?"
+        )
         exit(1)
-    
+
     # https://www.tensorflow.org/api_docs/python/tf/keras/optimizers/experimental/SGD
     optimizer = tf.keras.optimizers.experimental.SGD(
         learning_rate=config["params"]["learning_rate"],
@@ -42,25 +49,31 @@ def main():
         ema_momentum=0.99,
         ema_overwrite_frequency=None,
         jit_compile=True,
-        name='SGD',
+        name="SGD",
     )
 
     # Preprocessing, if the user supplied the command line argument
     if args.preprocess:
-        print(f"Attempting to preprocessing datafile from '{config['datasets']['src']}'")
-        preprocess_csv(src=config['datasets']['src'], dest=config['datasets']['dest'])
+        print(
+            f"Attempting to preprocessing datafile from '{config['datasets']['src']}'"
+        )
+        preprocess_csv(src=config["datasets"]["src"], dest=config["datasets"]["dest"])
         print("Done.")
-        print(f"Successfully preprocessed dataset. File is stored at '{config['datasets']['dest']}'")
-    
+        print(
+            f"Successfully preprocessed dataset. File is stored at '{config['datasets']['dest']}'"
+        )
+
     # Loading dataset into memory
     try:
-        data: pd.DataFrame = pd.read_csv(config['datasets']['dest'])
+        data: pd.DataFrame = pd.read_csv(config["datasets"]["dest"])
     except FileNotFoundError as e:
         print(f"Error: {e}")
-        print("The specified CSV file does not exist. Is the file properly preprocessed?")
+        print(
+            "The specified CSV file does not exist. Is the file properly preprocessed?"
+        )
         print("Usage: py main.py -p")
         exit(1)
-    
+
     # X: Features
     # Y: Targets
     X, Y = balance_dataset(data)
@@ -78,17 +91,17 @@ def main():
 
     # Generating the hidden layers
     for _ in range(config["params"]["hidden_layers"]):
-        model.add(tf.keras.layers.Dense(
-            units=config["params"]["hidden_units"],
-            activation=config["params"]["activation"],
-            input_shape=input_shape)
+        model.add(
+            tf.keras.layers.Dense(
+                units=config["params"]["hidden_units"],
+                activation=config["params"]["activation"],
+                input_shape=input_shape,
+            )
         )
     # Output Layer
-    model.add(tf.keras.layers.Dense(units=num_classes, activation='softmax'))
+    model.add(tf.keras.layers.Dense(units=num_classes, activation="softmax"))
     model.compile(
-        optimizer=optimizer,
-        loss='categorical_crossentropy',
-        metrics=['accuracy']
+        optimizer=optimizer, loss="categorical_crossentropy", metrics=["accuracy"]
     )
 
     # Standardize the features using a scaler
@@ -103,11 +116,12 @@ def main():
     # Train the model
     print("Beginning Training")
     history = model.fit(
-        X_train_scaled, Y_train_onehot,
+        X_train_scaled,
+        Y_train_onehot,
         epochs=config["params"]["epochs"],
         batch_size=config["params"]["batch_size"],
         validation_data=(X_test_scaled, Y_test_onehot),
-        verbose=1
+        verbose=1,
     )
 
     # Evaluate the model on the test data
@@ -116,6 +130,7 @@ def main():
     print(f"Test Accuracy: {test_accuracy:.4f}")
 
     print("Done.")
+
 
 if __name__ == "__main__":
     main()
