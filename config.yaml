@@ -11,7 +11,7 @@ params:
                                       # Possible values: sigmoid, ReLU, Tanh, Softmax, Linear, Leaky ReLU, PReLU
   momentum: 0.01                      # Momentum value for optimizer (SGD)
   learning_rate: 0.01                 # Learning rate for optimizer
-  epochs: 1                           # Number of training epochs
+  epochs: 25                          # Number of training epochs
   hidden_units: 21                    # Number of units/neurons in each hidden layer
   hidden_layers: 1                    # Number of hidden layers in the neural network
   batch_size: 1                       # Batch size for training
