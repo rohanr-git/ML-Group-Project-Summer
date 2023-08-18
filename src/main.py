@@ -4,11 +4,11 @@ CS 445/545 | Portland State University | ML Group Assignment Summer 2023
 """
 
 import argparse
-import matplotlib as plt
 from sklearn.discriminant_analysis import StandardScaler
 import tensorflow as tf
 import pandas as pd
 from utils.config import load_config, pretty_print_config
+from utils.plot_learning import plot_metric
 from utils.train_test_split import train_test_split
 from utils.preprocess import preprocess_csv, balance_dataset
 
@@ -128,6 +128,18 @@ def main():
     test_loss, test_accuracy = model.evaluate(X_test_scaled, Y_test_onehot, verbose=0)
     print(f"Test Loss: {test_loss:.4f}")
     print(f"Test Accuracy: {test_accuracy:.4f}")
+
+    # Generate graphs per batch size or epoch depending on the number of epochs
+    accuracy = {
+        "accuracy": history.history["accuracy"],
+        "val_accuracy": history.history["val_accuracy"],
+    }
+    loss = {
+        "loss": history.history["loss"],
+        "val_loss": history.history["val_loss"],
+    }
+    plot_metric(accuracy, "accuracy")
+    plot_metric(loss, "loss")
 
     print("Done.")
 
