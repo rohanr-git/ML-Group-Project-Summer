@@ -161,3 +161,6 @@ cython_debug/
 
 # Visual Studio Code settings not needed in a shared git repository
 .vscode/settings.json
+
+# Ignore hyperparameter caching directories
+untitled_project/*
