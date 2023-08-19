@@ -1,7 +1,28 @@
 import matplotlib.pyplot as plt
-from tensorflow import keras
+from utils.config import load_config
+
 
 def plot_metric(history, metric):
+    """
+    Plot a graph of the metric vs. epochs.
+
+    Args:
+        history (dict): The history object returned by model.fit()
+        metric (str): The metric to plot
+    """
+    # Clear the current figure
+    plt.clf()
+
+    # Load the config values
+    config: dict = load_config(src="./config.yaml")
+    epochs = config["params"]["epochs"]
+    learningrate = config["params"]["learning_rate"]
+    momentum = config["params"]["momentum"]
+    hiddenlayers = config["params"]["hidden_layers"]
+    hiddenunits = config["params"]["hidden_units"]
+    batchsize = config["params"]["batch_size"]
+
+    # Set the title and y-axis label
     if "accuracy" in metric:
         plt.title("Accuracy per Epoch %")
         plt.ylabel("Accuracy %")
@@ -13,12 +34,16 @@ def plot_metric(history, metric):
     plt.xlabel("Epoch")
 
     # Plot the graph
-    plt.plot(history[metric])
-    plt.plot(history[f"val_{metric}"])
+    plt.plot(history.history[metric])
+    plt.plot(history.history[f"val_{metric}"])
 
     # Add a legend
     plt.legend(["train", "test"], loc="upper left")
 
     # Save the graph
-    plt.savefig(f"graphs/epoch_{metric}.png")
-    print(f"Saved graph of {metric} per epoch to graphs/epoch_{metric}.png")
+    plt.savefig(
+        f"graphs/{metric}_e{epochs}_lr{learningrate}_m{momentum}_hl{hiddenlayers}_hu{hiddenunits}_bs{batchsize}.png"
+    )
+    print(
+        f"Saved graph of {metric} per epoch to graphs/{metric}_e{epochs}_lr{learningrate}_m{momentum}_hl{hiddenlayers}_hu{hiddenunits}_bs{batchsize}.png"
+    )

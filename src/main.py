@@ -130,16 +130,8 @@ def main():
     print(f"Test Accuracy: {test_accuracy:.4f}")
 
     # Generate graphs per batch size or epoch depending on the number of epochs
-    accuracy = {
-        "accuracy": history.history["accuracy"],
-        "val_accuracy": history.history["val_accuracy"],
-    }
-    loss = {
-        "loss": history.history["loss"],
-        "val_loss": history.history["val_loss"],
-    }
-    plot_metric(accuracy, "accuracy")
-    plot_metric(loss, "loss")
+    plot_metric(history, "accuracy")
+    plot_metric(history, "loss")
 
     print("Done.")
 
