@@ -5,8 +5,10 @@ CS 445/545 | Portland State University | ML Group Assignment Summer 2023
 
 import argparse
 from sklearn.discriminant_analysis import StandardScaler
+from sklearn.metrics import classification_report
 import tensorflow as tf
 import pandas as pd
+import numpy as np
 from utils.config import load_config, pretty_print_config
 from utils.plot_learning import plot_metric
 from utils.train_test_split import train_test_split
@@ -128,6 +130,15 @@ def main():
     test_loss, test_accuracy = model.evaluate(X_test_scaled, Y_test_onehot, verbose=0)
     print(f"Test Loss: {test_loss:.4f}")
     print(f"Test Accuracy: {test_accuracy:.4f}")
+
+    # Make predictions on the test data
+    Y_pred = model.predict(X_test_scaled)
+    Y_pred_classes = np.argmax(Y_pred, axis=1)  # Convert one-hot encoded predictions to classes
+
+    # Calculate and print classification report
+    class_report = classification_report(Y_test, Y_pred_classes)
+    print("Classification Report:")
+    print(class_report)
 
     # Generate graphs per batch size or epoch depending on the number of epochs
     plot_metric(history, "accuracy")
