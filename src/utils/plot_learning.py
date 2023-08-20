@@ -4,7 +4,7 @@ import numpy as np
 import itertools
 from sklearn.metrics import confusion_matrix
 
-def plot_metric(history, metric):
+def plot_metric(history, metric, hypermodel=False):
     """
     Plot a graph of the metric vs. epochs.
 
@@ -23,6 +23,7 @@ def plot_metric(history, metric):
     hiddenlayers = config["params"]["hidden_layers"]
     hiddenunits = config["params"]["hidden_units"]
     batchsize = config["params"]["batch_size"]
+    activation = config["params"]["activation"]
 
     # Set the title and y-axis label
     if "accuracy" in metric:
@@ -43,13 +44,21 @@ def plot_metric(history, metric):
     plt.legend(["train", "test"], loc="upper left")
 
     # Save the graph
-    plt.savefig(
-        f"graphs/{metric}_e{epochs}_lr{learningrate}_m{momentum}_hl{hiddenlayers}_hu{hiddenunits}_bs{batchsize}.png"
-    )
-    print(
-        f"Saved graph of {metric} per epoch to graphs/{metric}_e{epochs}_lr{learningrate}_m{momentum}_hl{hiddenlayers}_hu{hiddenunits}_bs{batchsize}.png"
-    )
 
+    if hypermodel:
+        plt.savefig(
+            f"graphs/hypermodel/{activation}/{metric}_e{epochs}_lr{learningrate}_m{momentum}_hl{hiddenlayers}_hu{hiddenunits}_bs{batchsize}.png"
+        )
+        print(
+            f"Saved graph of {metric} per epoch to graphs/hypermodel/{activation}/{metric}_e{epochs}_lr{learningrate}_m{momentum}_hl{hiddenlayers}_hu{hiddenunits}_bs{batchsize}.png"
+        )
+    else:
+        plt.savefig(
+            f"graphs/{activation}/{metric}_e{epochs}_lr{learningrate}_m{momentum}_hl{hiddenlayers}_hu{hiddenunits}_bs{batchsize}.png"
+        )
+        print(
+            f"Saved graph of {metric} per epoch to graphs/{activation}/{metric}_e{epochs}_lr{learningrate}_m{momentum}_hl{hiddenlayers}_hu{hiddenunits}_bs{batchsize}.png"
+        )
 
 def plot_confusion_matrix(Y_true, Y_pred_classes, num_classes):
 

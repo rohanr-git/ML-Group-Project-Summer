@@ -3,10 +3,12 @@ Alexander Gutowsky, Ethan Saftler, Gatlin Newhouse, Manisha Katta, Rohan Reddy
 CS 445/545 | Portland State University | ML Group Assignment Summer 2023
 """
 
-from sklearn.discriminant_analysis import StandardScaler
 import tensorflow as tf
 import keras_tuner as kt
 import pandas as pd
+import numpy as np
+from sklearn.discriminant_analysis import StandardScaler
+from sklearn.metrics import classification_report
 from utils.config import load_config, pretty_print_config
 from utils.plot_learning import plot_metric
 from utils.train_test_split import train_test_split
@@ -150,35 +152,28 @@ def main():
         model_builder,
         objective="val_accuracy",
         max_epochs=25,
-        factor=3,
     )
 
     # Define early stopping callback based on validation loss
     stop_early = tf.keras.callbacks.EarlyStopping(monitor="val_loss", patience=5)
 
     # Search for the best hyperparameters
-    # 80% of the training data is used for training, 20% for validation
     tuner.search(
         X_train_scaled,
         Y_train_onehot,
-        epochs=25,
-        validation_split=0.2,
+        epochs=config["params"]["epochs"],
+        batch_size=config["params"]["batch_size"],
+        validation_data=(X_test_scaled, Y_test_onehot),
+        verbose=1,
         callbacks=[stop_early],
     )
 
     # Get the optimal hyperparameters
     best_hps = tuner.get_best_hyperparameters(num_trials=10)[0]
 
-    # Print the optimal hyperparameters
-    print(f"""The hyperparameter search is complete. The optimal number of units in {best_hps.get('hidden_layers')} layers
-        is {best_hps.get('hidden_units')}. The optimal learning rate for the optimizer is {best_hps.get('learning_rate')}
-        and the optimal momentum is {best_hps.get('momentum')}. The optimal activation function for the hidden layers is
-        {best_hps.get('activation')}.""")
-
     # Build the model with the optimal hyperparameters and train it on the data for 50 epochs
-    # 80% of the training data is used for training, 20% for validation
     model = tuner.hypermodel.build(best_hps)
-    history = model.fit(X_train_scaled, Y_train_onehot, epochs=50, validation_split=0.2)
+    history = model.fit(X_train_scaled, Y_train_onehot, epochs=50)
     val_acc_per_epoch = history.history["val_accuracy"]
     best_epoch = val_acc_per_epoch.index(max(val_acc_per_epoch)) + 1
     print("Best epoch: %d" % (best_epoch,))
@@ -186,13 +181,27 @@ def main():
     # Now we have our best hyperparameters and optimal number of epochs, we can train the model
     hypermodel = tuner.hypermodel.build(best_hps)
     # Retrain the model
-    hypermodel.fit(
-        X_train_scaled, Y_train_onehot, epochs=best_epoch, validation_split=0.2
+    history = hypermodel.fit(
+        X_train_scaled, Y_train_onehot, epochs=best_epoch
     )
 
     # Now print the accuracy and loss on the test set
-    eval_result = hypermodel.evaluate(X_test_scaled, Y_test_onehot)
-    print("[test loss, test accuracy]:", eval_result)
+    test_loss, test_accuracy = hypermodel.evaluate(X_test_scaled, Y_test_onehot, verbose=0)
+    print(f"Test Loss: {test_loss:.4f}")
+    print(f"Test Accuracy: {test_accuracy:.4f}")
+
+    # Make predictions on the test data
+    Y_pred = model.predict(X_test_scaled)
+    Y_pred_classes = np.argmax(Y_pred, axis=1)  # Convert one-hot encoded predictions to classes
+
+    # Calculate and print classification report
+    class_report = classification_report(Y_test, Y_pred_classes)
+    print("Classification Report:")
+    print(class_report)
+
+    # Generate graphs per batch size or epoch depending on the number of epochs
+    plot_metric(history, "accuracy", True)
+    plot_metric(history, "loss", True)
 
     # Print the optimal hyperparameters
     print("Optimal Hyperparameters:")
