@@ -1,6 +1,8 @@
 import matplotlib.pyplot as plt
 from utils.config import load_config
-
+import numpy as np
+import itertools
+from sklearn.metrics import confusion_matrix
 
 def plot_metric(history, metric):
     """
@@ -47,3 +49,32 @@ def plot_metric(history, metric):
     print(
         f"Saved graph of {metric} per epoch to graphs/{metric}_e{epochs}_lr{learningrate}_m{momentum}_hl{hiddenlayers}_hu{hiddenunits}_bs{batchsize}.png"
     )
+
+
+def plot_confusion_matrix(Y_true, Y_pred_classes, num_classes):
+
+    cm = confusion_matrix(Y_true, Y_pred_classes)
+    print("Confusion Matrix:")
+    print(cm)
+
+    plt.figure()
+    plt.imshow(cm, interpolation="nearest", cmap=plt.cm.Blues)
+    plt.title("Confusion Matrix")
+    plt.colorbar()
+    tick_marks = np.arange(num_classes)
+    plt.xticks(tick_marks, tick_marks)
+    plt.yticks(tick_marks, tick_marks)
+    plt.ylabel("True label")
+    plt.xlabel("Predicted label")
+
+    # Adding the number of each occurrence to the grid
+    thresh = cm.max() / 2.
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, cm[i, j],
+                 horizontalalignment="center",
+                 color="white" if cm[i, j] > thresh else "black")
+
+    # Save the plot as an image file
+    output_path = "./graphs/confusion_matrix.png"
+    plt.savefig(output_path)
+    print(f"Saved confusion matrix to {output_path}")
