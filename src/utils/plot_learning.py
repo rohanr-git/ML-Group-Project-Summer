@@ -3,6 +3,8 @@ from utils.config import load_config
 import numpy as np
 import itertools
 from sklearn.metrics import confusion_matrix
+import os
+
 
 def plot_metric(history, metric, hypermodel=False):
     """
@@ -46,6 +48,8 @@ def plot_metric(history, metric, hypermodel=False):
     # Save the graph
 
     if hypermodel:
+        if not os.path.exists(f"graphs/hypermodel/{activation}"):
+            os.makedirs(f"graphs/hypermodel/{activation}")
         plt.savefig(
             f"graphs/hypermodel/{activation}/{metric}_e{epochs}_lr{learningrate}_m{momentum}_hl{hiddenlayers}_hu{hiddenunits}_bs{batchsize}.png"
         )
@@ -53,6 +57,8 @@ def plot_metric(history, metric, hypermodel=False):
             f"Saved graph of {metric} per epoch to graphs/hypermodel/{activation}/{metric}_e{epochs}_lr{learningrate}_m{momentum}_hl{hiddenlayers}_hu{hiddenunits}_bs{batchsize}.png"
         )
     else:
+        if not os.path.exists(f"graphs/{activation}"):
+            os.makedirs(f"graphs/{activation}")
         plt.savefig(
             f"graphs/{activation}/{metric}_e{epochs}_lr{learningrate}_m{momentum}_hl{hiddenlayers}_hu{hiddenunits}_bs{batchsize}.png"
         )
@@ -60,7 +66,10 @@ def plot_metric(history, metric, hypermodel=False):
             f"Saved graph of {metric} per epoch to graphs/{activation}/{metric}_e{epochs}_lr{learningrate}_m{momentum}_hl{hiddenlayers}_hu{hiddenunits}_bs{batchsize}.png"
         )
 
+
 def plot_confusion_matrix(Y_true, Y_pred_classes, num_classes):
+    # Clear the figure
+    plt.clf()
 
     cm = confusion_matrix(Y_true, Y_pred_classes)
     print("Confusion Matrix:")
@@ -77,11 +86,15 @@ def plot_confusion_matrix(Y_true, Y_pred_classes, num_classes):
     plt.xlabel("Predicted label")
 
     # Adding the number of each occurrence to the grid
-    thresh = cm.max() / 2.
+    thresh = cm.max() / 2.0
     for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-        plt.text(j, i, cm[i, j],
-                 horizontalalignment="center",
-                 color="white" if cm[i, j] > thresh else "black")
+        plt.text(
+            j,
+            i,
+            cm[i, j],
+            horizontalalignment="center",
+            color="white" if cm[i, j] > thresh else "black",
+        )
 
     # Save the plot as an image file
     output_path = "./graphs/confusion_matrix.png"
