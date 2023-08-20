@@ -10,7 +10,7 @@ import tensorflow as tf
 import pandas as pd
 import numpy as np
 from utils.config import load_config, pretty_print_config
-from utils.plot_learning import plot_metric
+from utils.plot_learning import plot_metric, plot_confusion_matrix
 from utils.train_test_split import train_test_split
 from utils.preprocess import preprocess_csv, balance_dataset
 
@@ -139,6 +139,10 @@ def main():
     class_report = classification_report(Y_test, Y_pred_classes)
     print("Classification Report:")
     print(class_report)
+
+    # Call the new function to plot the confusion matrix
+    num_classes = len(np.unique(Y_test))  # Get the number of unique classes
+    plot_confusion_matrix(Y_test, Y_pred_classes, num_classes)
 
     # Generate graphs per batch size or epoch depending on the number of epochs
     plot_metric(history, "accuracy")

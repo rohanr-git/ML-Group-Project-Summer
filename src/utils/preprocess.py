@@ -167,7 +167,6 @@ def preprocess_csv(src: str, dest: str):
 
 
 def balance_dataset(data):
-    data.iloc[:, 8:12] = data.iloc[:, 8:12] / 500
 
     # Balance data due to extreme class imbalance (92% negative, 8% positive)
     data_majority = data[data.iloc[:, -1] == 0]
