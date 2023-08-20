@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 from utils.config import load_config
 
 
-def plot_metric(history, metric):
+def plot_metric(history, metric, hypermodel=False):
     """
     Plot a graph of the metric vs. epochs.
 
@@ -42,9 +42,17 @@ def plot_metric(history, metric):
     plt.legend(["train", "test"], loc="upper left")
 
     # Save the graph
-    plt.savefig(
-        f"graphs/{activation}/{metric}_e{epochs}_lr{learningrate}_m{momentum}_hl{hiddenlayers}_hu{hiddenunits}_bs{batchsize}.png"
-    )
-    print(
-        f"Saved graph of {metric} per epoch to graphs/{activation}/{metric}_e{epochs}_lr{learningrate}_m{momentum}_hl{hiddenlayers}_hu{hiddenunits}_bs{batchsize}.png"
-    )
+    if hypermodel:
+        plt.savefig(
+            f"graphs/hypermodel/{activation}/{metric}_e{epochs}_lr{learningrate}_m{momentum}_hl{hiddenlayers}_hu{hiddenunits}_bs{batchsize}.png"
+        )
+        print(
+            f"Saved graph of {metric} per epoch to graphs/hypermodel/{activation}/{metric}_e{epochs}_lr{learningrate}_m{momentum}_hl{hiddenlayers}_hu{hiddenunits}_bs{batchsize}.png"
+        )
+    else:
+        plt.savefig(
+            f"graphs/{activation}/{metric}_e{epochs}_lr{learningrate}_m{momentum}_hl{hiddenlayers}_hu{hiddenunits}_bs{batchsize}.png"
+        )
+        print(
+            f"Saved graph of {metric} per epoch to graphs/{activation}/{metric}_e{epochs}_lr{learningrate}_m{momentum}_hl{hiddenlayers}_hu{hiddenunits}_bs{batchsize}.png"
+        )
