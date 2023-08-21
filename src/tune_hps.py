@@ -192,7 +192,7 @@ def main():
     print(f"Test Accuracy: {test_accuracy:.4f}")
 
     # Make predictions on the test data
-    Y_pred = model.predict(X_test_scaled)
+    Y_pred = hypermodel.predict(X_test_scaled)
     Y_pred_classes = np.argmax(Y_pred, axis=1)  # Convert one-hot encoded predictions to classes
 
     # Calculate and print classification report
