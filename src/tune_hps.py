@@ -74,6 +74,7 @@ def model_builder(hp):
     )
 
     # Get activation from config
+    # activation = hp.Choice("activation", values=["relu", "sigmoid", "tanh", "selu", "elu", "prelu", "leakyrelu"])
     activation = hp.Choice("activation", values=["relu", "sigmoid", "tanh"])
 
     # Generating the hidden layers
