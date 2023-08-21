@@ -10,7 +10,7 @@ import numpy as np
 from sklearn.discriminant_analysis import StandardScaler
 from sklearn.metrics import classification_report
 from utils.config import load_config, pretty_print_config
-from utils.plot_learning import plot_metric
+from utils.plot_learning import plot_confusion_matrix, plot_metric
 from utils.train_test_split import train_test_split
 from utils.preprocess import balance_dataset
 
@@ -74,6 +74,7 @@ def model_builder(hp):
     )
 
     # Get activation from config
+    # activation = hp.Choice("activation", values=["relu", "sigmoid", "tanh", "selu", "elu"])
     activation = hp.Choice("activation", values=["relu", "sigmoid", "tanh"])
 
     # Generating the hidden layers
@@ -172,17 +173,18 @@ def main():
     best_hps = tuner.get_best_hyperparameters(num_trials=10)[0]
 
     # Build the model with the optimal hyperparameters and train it on the data for 50 epochs
-    model = tuner.hypermodel.build(best_hps)
-    history = model.fit(X_train_scaled, Y_train_onehot, epochs=50)
-    val_acc_per_epoch = history.history["val_accuracy"]
-    best_epoch = val_acc_per_epoch.index(max(val_acc_per_epoch)) + 1
-    print("Best epoch: %d" % (best_epoch,))
+    # ERROR occurs in this code below:
+    # model = tuner.hypermodel.build(best_hps)
+    # history = model.fit(X_train_scaled, Y_train_onehot, epochs=50)
+    # val_acc_per_epoch = history.history["val_accuracy"]
+    # best_epoch = val_acc_per_epoch.index(max(val_acc_per_epoch)) + 1
+    # print("Best epoch: %d" % (best_epoch,))
 
     # Now we have our best hyperparameters and optimal number of epochs, we can train the model
     hypermodel = tuner.hypermodel.build(best_hps)
     # Retrain the model
     history = hypermodel.fit(
-        X_train_scaled, Y_train_onehot, epochs=best_epoch
+        X_train_scaled, Y_train_onehot, epochs=50
     )
 
     # Now print the accuracy and loss on the test set
@@ -191,13 +193,17 @@ def main():
     print(f"Test Accuracy: {test_accuracy:.4f}")
 
     # Make predictions on the test data
-    Y_pred = model.predict(X_test_scaled)
+    Y_pred = hypermodel.predict(X_test_scaled)
     Y_pred_classes = np.argmax(Y_pred, axis=1)  # Convert one-hot encoded predictions to classes
 
     # Calculate and print classification report
     class_report = classification_report(Y_test, Y_pred_classes)
     print("Classification Report:")
     print(class_report)
+
+    # Call the new function to plot the confusion matrix
+    num_classes = len(np.unique(Y_test))  # Get the number of unique classes
+    plot_confusion_matrix(Y_test, Y_pred_classes, num_classes)
 
     # Generate graphs per batch size or epoch depending on the number of epochs
     plot_metric(history, "accuracy", True)
@@ -210,7 +216,7 @@ def main():
     print(f"- Activation function: {best_hps.get('activation')}")
     print(f"- Learning rate: {best_hps.get('learning_rate')}")
     print(f"- Momentum: {best_hps.get('momentum')}")
-    print(f"- Best number of epochs to train: {best_epoch}")
+    # print(f"- Best number of epochs to train: {best_epoch}")
     print("Done.")
 
 
