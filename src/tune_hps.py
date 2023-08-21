@@ -172,17 +172,18 @@ def main():
     best_hps = tuner.get_best_hyperparameters(num_trials=10)[0]
 
     # Build the model with the optimal hyperparameters and train it on the data for 50 epochs
-    model = tuner.hypermodel.build(best_hps)
-    history = model.fit(X_train_scaled, Y_train_onehot, epochs=50)
-    val_acc_per_epoch = history.history["val_accuracy"]
-    best_epoch = val_acc_per_epoch.index(max(val_acc_per_epoch)) + 1
-    print("Best epoch: %d" % (best_epoch,))
+    # ERROR occurs in this code below:
+    # model = tuner.hypermodel.build(best_hps)
+    # history = model.fit(X_train_scaled, Y_train_onehot, epochs=50)
+    # val_acc_per_epoch = history.history["val_accuracy"]
+    # best_epoch = val_acc_per_epoch.index(max(val_acc_per_epoch)) + 1
+    # print("Best epoch: %d" % (best_epoch,))
 
     # Now we have our best hyperparameters and optimal number of epochs, we can train the model
     hypermodel = tuner.hypermodel.build(best_hps)
     # Retrain the model
     history = hypermodel.fit(
-        X_train_scaled, Y_train_onehot, epochs=best_epoch
+        X_train_scaled, Y_train_onehot, epochs=50
     )
 
     # Now print the accuracy and loss on the test set
@@ -210,7 +211,7 @@ def main():
     print(f"- Activation function: {best_hps.get('activation')}")
     print(f"- Learning rate: {best_hps.get('learning_rate')}")
     print(f"- Momentum: {best_hps.get('momentum')}")
-    print(f"- Best number of epochs to train: {best_epoch}")
+    # print(f"- Best number of epochs to train: {best_epoch}")
     print("Done.")
 
 
