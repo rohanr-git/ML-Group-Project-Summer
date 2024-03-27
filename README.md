@@ -11,7 +11,7 @@ This is a group research project that compares the performance and accuracies of
 ### Installation
 
 1. Clone this repository, or fork your own:
-    ``git clone git@github.com:agutowsky/ML-Group-Project-Summer-2023.git``
+    ``git clone git@github.com:rohanr-git/ML-Group-Project-Summer-2023.git``
     > How to fork your own repository: https://docs.github.com/en/get-started/quickstart/fork-a-repo
 
 2. Install the required python packages with:
